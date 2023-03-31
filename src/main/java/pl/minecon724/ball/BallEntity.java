@@ -45,14 +45,6 @@ public class BallEntity extends Entity {
 		final Instance instance = this.getInstance();
 		final Pos initialPosition = this.getPosition();
 		
-		// load chunk
-		if (!this.getInstance().isChunkLoaded(initialPosition))
-			try {
-				this.getInstance().loadChunk(initialPosition).get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-		
 		// new pos
 		
 		this.velocity = this.velocity.add(0, gravity*(deltaTime/1000), 0);
@@ -98,6 +90,14 @@ public class BallEntity extends Entity {
 		}
 		
 		// ocnfirm
+		
+		if (!this.getInstance().isChunkLoaded(newPosition)) {
+			try {
+				this.getInstance().loadChunk(newPosition).get();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
 		this.teleport(newPosition);
 		
 		double distance = initialPosition.distance(newPosition) * (1000/deltaTime);
