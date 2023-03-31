@@ -1,0 +1,36 @@
+name: Maven build and package
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: 17
+
+    - name: Compile with Maven
+      run: |
+        mvn -B compile
+
+    - name: Package with Maven
+      run: |
+        mvn -B package
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: target
+        path: target/ball-*.jar
