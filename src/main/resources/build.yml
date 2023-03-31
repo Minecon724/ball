@@ -1,4 +1,4 @@
 artifactId: "${project.artifactId}"
 version: "${project.version}"
 builder: "${os.name} ${os.version} ${os.arch}"
-timestamp: "${maven.build.timestamp}"
+timestamp: "${timestamp}"
