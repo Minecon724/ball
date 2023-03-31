@@ -4,6 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
@@ -43,6 +44,7 @@ public class MainClass {
 		GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 		SchedulerManager scheduler = MinecraftServer.getSchedulerManager();
 		CommandManager commandManager = MinecraftServer.getCommandManager();
+		ComponentLogger logger = MinecraftServer.LOGGER;
 		
 		// Config
 		MinecraftServer.setBrandName("Velocity");
@@ -53,6 +55,7 @@ public class MainClass {
 		commandManager.register(new HelpCommand());
 		commandManager.register(new BallCommand());
 		commandManager.register(new FlyCommand());
+		commandManager.register(new AboutCommand());
 		
 		// Create a dimenstion
 		DimensionType dimension = DimensionType.builder(NamespaceID.from("dimension"))
@@ -125,7 +128,7 @@ public class MainClass {
 			@Override
 			public void run() {
 				instanceContainer.saveChunksToStorage();
-				System.out.println("saved");
+				logger.info("Instance saved");
 			}
 		}, TaskSchedule.immediate(), TaskSchedule.seconds(30), ExecutionType.ASYNC);
 		
@@ -141,6 +144,8 @@ public class MainClass {
 				});
 			}
 		}, TaskSchedule.immediate(), TaskSchedule.seconds(10), ExecutionType.ASYNC);
+		
+		new Logger(logger, globalEventHandler);
 		
 		// Start the server
 		mcServer.start("0.0.0.0", 25565);

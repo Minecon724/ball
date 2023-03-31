@@ -89,8 +89,9 @@ public class BallEntity extends Entity {
 		}
 		
 		// ocnfirm
+		if (this.getInstance().isChunkLoaded(newPosition))
+			this.teleport(newPosition);
 		
-		this.teleport(newPosition);
 		double distance = initialPosition.distance(newPosition) * (1000/deltaTime);
 		
 		if (distance > 23) {

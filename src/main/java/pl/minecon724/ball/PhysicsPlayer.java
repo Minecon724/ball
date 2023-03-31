@@ -38,8 +38,10 @@ public class PhysicsPlayer extends Player {
 		
 		this.eventNode().addListener(EventListener.builder(PlayerMoveEvent.class)
 				.handler(event -> {
-					movement = event.getNewPosition().sub(event.getEntity().getPosition()).asVec().mul(1000/(System.currentTimeMillis() - lastMove));
-					lastMove = System.currentTimeMillis();
+					try {
+						movement = event.getNewPosition().sub(event.getEntity().getPosition()).asVec().mul(1000/(System.currentTimeMillis() - lastMove));
+						lastMove = System.currentTimeMillis();
+					} catch (ArithmeticException e) { }
 					
 					
 					modStrength(-movement.length() * 0.002);
