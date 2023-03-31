@@ -62,6 +62,11 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+				<artifactSet>
+					<includes>
+						<include>com.github.benmanes.caffeine.cache.SSW</include>
+					</includes>
+				</artifactSet>
 			  <minimizeJar>true</minimizeJar>
             </configuration>
           </execution>
