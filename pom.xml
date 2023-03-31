@@ -64,7 +64,7 @@
             <configuration>
 				<artifactSet>
 					<includes>
-						<include>com.github.benmanes.caffeine.cache.SSW</include>
+						<include>*:*</include>
 					</includes>
 				</artifactSet>
 			  <minimizeJar>true</minimizeJar>
