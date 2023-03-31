@@ -44,11 +44,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <artifactSet>
-                <includes>
-                  <include>*:*</include>
-                </includes>
-              </artifactSet>
+			  <minimizeJar>true</minimizeJar>
             </configuration>
           </execution>
         </executions>
