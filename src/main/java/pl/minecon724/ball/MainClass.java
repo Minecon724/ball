@@ -90,7 +90,10 @@ public class MainClass {
 					3,
 					ThreadLocalRandom.current().nextInt(-75, 75));
 			player.setRespawnPoint(spawnPoint);
-			new BallEntity().setInstance(instanceContainer, spawnPoint.add(0, 5, 5));
+			
+			instanceContainer.loadChunk(spawnPoint.add(0, 5, 5)).thenAccept(chunk -> {
+				new BallEntity().setInstance(instanceContainer, spawnPoint.add(0, 5, 5));
+			});
 		});
 		
 		globalEventHandler.addListener(ServerListPingEvent.class, event -> {

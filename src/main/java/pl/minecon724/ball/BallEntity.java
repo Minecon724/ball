@@ -92,11 +92,7 @@ public class BallEntity extends Entity {
 		// ocnfirm
 		
 		if (!this.getInstance().isChunkLoaded(newPosition)) {
-			try {
-				this.getInstance().loadChunk(newPosition).get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
+			this.getInstance().loadChunk(newPosition).join();
 		}
 		this.teleport(newPosition);
 		
