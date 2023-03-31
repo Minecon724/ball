@@ -15,17 +15,17 @@ public class BallCommand extends Command {
 		this.setDefaultExecutor((sender, context) -> {
 			Player player = (Player) sender;
 			
-			Point point = player.getTargetBlockPosition(6);
+			Point point = player.getTargetBlockPosition(6).add(0.5, 5, 0.5);
 			
 			if (point == null) {
 				ThreadLocalRandom random = ThreadLocalRandom.current();
 				point = player.getPosition().add(random.nextDouble(-4, 4), 5, random.nextDouble(-4, 4));
+				
+				player.lookAt(point.withY(player.getPosition().y()+1));
 			}
 
 			BallEntity ball = new BallEntity();
 			ball.setInstance(player.getInstance(), point);
-			
-			player.lookAt(ball.getPosition().withY(player.getPosition().y()+1));
 		});
 	}
 

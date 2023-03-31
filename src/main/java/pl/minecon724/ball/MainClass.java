@@ -133,7 +133,7 @@ public class MainClass {
 				instanceContainer.saveChunksToStorage();
 				logger.info("Instance saved");
 			}
-		}, TaskSchedule.immediate(), TaskSchedule.seconds(30), ExecutionType.ASYNC);
+		}, TaskSchedule.immediate(), TaskSchedule.minutes(5), ExecutionType.ASYNC);
 		
 		scheduler.scheduleTask(new Runnable() {
 			@Override
