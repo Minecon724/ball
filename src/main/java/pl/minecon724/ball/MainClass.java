@@ -9,8 +9,13 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventListener;
 import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.event.item.ItemDropEvent;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerStartDiggingEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
@@ -93,6 +98,28 @@ public class MainClass {
 					LegacyComponentSerializer.legacyAmpersand().deserialize("&#b8fbcfu&#b3f7e6w&#adf3fdu"));
 			event.setResponseData(responseData);
 		});
+		
+		globalEventHandler.addListener(EventListener.builder(ItemDropEvent.class)
+				.handler(event -> {
+					event.setCancelled(true);
+				}).build());
+		
+		globalEventHandler.addListener(EventListener.builder(PlayerStartDiggingEvent.class)
+				.handler(event -> {
+					if (event.getBlock() != Block.STONE) return;
+					
+					event.getInstance().setBlock(event.getBlockPosition(), Block.AIR);
+				}).build());
+		
+		globalEventHandler.addListener(EventListener.builder(PlayerBlockPlaceEvent.class)
+				.handler(event -> {
+					event.consumeBlock(false);
+				}).build());
+		
+		globalEventHandler.addListener(EventListener.builder(PlayerBlockBreakEvent.class)
+				.handler(event -> {
+					event.setCancelled(true);
+				}).build());
 		
 		scheduler.scheduleTask(new Runnable() {
 			@Override

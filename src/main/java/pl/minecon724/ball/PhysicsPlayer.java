@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
+import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerChangeHeldSlotEvent;
@@ -77,23 +78,6 @@ public class PhysicsPlayer extends Player {
 					int mod = from-to;
 					
 					modStrength(strengthIncrement * mod);
-				}).build());
-		
-		this.eventNode().addListener(EventListener.builder(PlayerStartDiggingEvent.class)
-				.handler(event -> {
-					if (event.getBlock() != Block.STONE) return;
-					
-					event.getInstance().setBlock(event.getBlockPosition(), Block.AIR);
-				}).build());
-		
-		this.eventNode().addListener(EventListener.builder(PlayerBlockPlaceEvent.class)
-				.handler(event -> {
-					event.consumeBlock(false);
-				}).build());
-		
-		this.eventNode().addListener(EventListener.builder(PlayerBlockBreakEvent.class)
-				.handler(event -> {
-					event.setCancelled(true);
 				}).build());
 	}
 	
