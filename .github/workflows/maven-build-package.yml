@@ -3,7 +3,7 @@ name: Maven build and package
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
