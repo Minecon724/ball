@@ -18,6 +18,7 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerStartDiggingEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
+import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.block.Block;
@@ -49,7 +50,8 @@ public class MainClass {
 		// Config
 		MinecraftServer.setBrandName("Velocity");
 		MinecraftServer.getConnectionManager().setPlayerProvider(new PhysicsPlayerProvider());
-		MinecraftServer.setCompressionThreshold(512);
+		MinecraftServer.setCompressionThreshold(0);
+		VelocityProxy.enable("rrXQ5MTvSles");
 		
 		// Register commands
 		commandManager.register(new HelpCommand());
@@ -94,15 +96,6 @@ public class MainClass {
 			instanceContainer.loadChunk(spawnPoint.add(0, 5, 5)).thenAccept(chunk -> {
 				new BallEntity().setInstance(instanceContainer, spawnPoint.add(0, 5, 5));
 			});
-		});
-		
-		globalEventHandler.addListener(ServerListPingEvent.class, event -> {
-			ResponseData responseData = event.getResponseData();
-			responseData.clearEntries();
-			responseData.setPlayersHidden(true);
-			responseData.setDescription(
-					LegacyComponentSerializer.legacyAmpersand().deserialize("&#b8fbcfu&#b3f7e6w&#adf3fdu"));
-			event.setResponseData(responseData);
 		});
 		
 		globalEventHandler.addListener(EventListener.builder(ItemDropEvent.class)
@@ -151,6 +144,6 @@ public class MainClass {
 		new Logger(logger, globalEventHandler);
 		
 		// Start the server
-		mcServer.start("0.0.0.0", 25565);
+		mcServer.start("127.0.0.1", 37166);
 	}
 }
