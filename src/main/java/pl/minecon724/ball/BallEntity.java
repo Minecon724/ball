@@ -60,6 +60,15 @@ public class BallEntity extends Entity {
 		Point pointSouth = newPosition.add(0, 0.5, 0.5);
 		Point pointNorth = pointSouth.sub(0, 0, 1);
 		
+		if (!this.getInstance().isChunkLoaded(pointEast))
+			this.getInstance().loadChunk(pointEast);
+		if (!this.getInstance().isChunkLoaded(pointWest))
+			this.getInstance().loadChunk(pointWest);
+		if (!this.getInstance().isChunkLoaded(pointNorth))
+			this.getInstance().loadChunk(pointNorth);
+		if (!this.getInstance().isChunkLoaded(pointSouth))
+			this.getInstance().loadChunk(pointSouth);
+		
 		if (this.getInstance().getBlock(pointBottom).isSolid() || this.getInstance().getBlock(pointTop).isSolid()) {
 			newPosition = newPosition.withY(initialPosition.y());
 			this.velocity = this.velocity.mul(0.97, -0.8, 0.97);

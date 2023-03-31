@@ -22,13 +22,9 @@ jobs:
         java-version: 17
         distribution: temurin
 
-    - name: Compile with Maven
+    - name: Maven build package
       run: |
-        mvn -B compile
-
-    - name: Package with Maven
-      run: |
-        mvn -B package
+        mvn build package
     
     - name: Upload artifact
       uses: actions/upload-artifact@v2

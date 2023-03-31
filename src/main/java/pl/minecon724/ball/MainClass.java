@@ -49,7 +49,7 @@ public class MainClass {
 		// Config
 		MinecraftServer.setBrandName("Velocity");
 		MinecraftServer.getConnectionManager().setPlayerProvider(new PhysicsPlayerProvider());
-		MinecraftServer.setCompressionThreshold(128);
+		MinecraftServer.setCompressionThreshold(512);
 		
 		// Register commands
 		commandManager.register(new HelpCommand());

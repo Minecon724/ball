@@ -17,7 +17,7 @@ public class BallCommand extends Command {
 			
 			Point point = player.getTargetBlockPosition(6).add(0.5, 5, 0.5);
 			
-			if (point == null) {
+			if (point == null || !player.getInstance().getBlock(point).isSolid()) {
 				ThreadLocalRandom random = ThreadLocalRandom.current();
 				point = player.getPosition().add(random.nextDouble(-4, 4), 5, random.nextDouble(-4, 4));
 				
