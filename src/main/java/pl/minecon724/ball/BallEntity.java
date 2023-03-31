@@ -1,5 +1,6 @@
 package pl.minecon724.ball;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
 import net.minestom.server.collision.BoundingBox;
@@ -43,6 +44,14 @@ public class BallEntity extends Entity {
 		
 		final Instance instance = this.getInstance();
 		final Pos initialPosition = this.getPosition();
+		
+		// load chunk
+		if (!this.getInstance().isChunkLoaded(initialPosition))
+			try {
+				this.getInstance().loadChunk(initialPosition).get();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
 		
 		// new pos
 		
@@ -89,8 +98,7 @@ public class BallEntity extends Entity {
 		}
 		
 		// ocnfirm
-		if (this.getInstance().isChunkLoaded(newPosition))
-			this.teleport(newPosition);
+		this.teleport(newPosition);
 		
 		double distance = initialPosition.distance(newPosition) * (1000/deltaTime);
 		
