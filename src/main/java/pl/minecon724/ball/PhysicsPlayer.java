@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
+import net.minestom.server.event.inventory.InventoryClickEvent;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.inventory.PlayerInventoryItemChangeEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
@@ -17,6 +20,11 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerStartDiggingEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.PlayerInventory;
+import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.network.player.PlayerConnection;
 
 public class PhysicsPlayer extends Player {
@@ -70,6 +78,8 @@ public class PhysicsPlayer extends Player {
 		
 		this.eventNode().addListener(EventListener.builder(PlayerChangeHeldSlotEvent.class)
 				.handler(event -> {
+					PlayerInventory inventory = event.getPlayer().getInventory();
+					
 					int from = event.getPlayer().getHeldSlot();
 					int to = event.getSlot();
 					
@@ -80,6 +90,40 @@ public class PhysicsPlayer extends Player {
 					int mod = from-to;
 					
 					modStrength(strengthIncrement * mod);
+					
+					boolean retry = true;
+					
+					while (retry) {
+						for (int l=0;l<Math.abs(mod);l++) {
+							if (mod < 0) {
+								
+								ItemStack temp = inventory.getItemStack(0);
+								for (int i=0;i<8;i++) {
+									inventory.setItemStack(i, inventory.getItemStack(i+1));
+								}
+								inventory.setItemStack(8, temp);
+								
+							} else {
+								
+								ItemStack temp = inventory.getItemStack(8);
+								for (int i=8;i>0;i--) {
+									inventory.setItemStack(i, inventory.getItemStack(i-1));
+								}
+								inventory.setItemStack(0, temp);
+							}
+						}
+						
+						mod = mod > 0 ? 1 : -1;
+						retry = false;
+						
+						for (int i=0;i<9;i++) {
+							retry = inventory.getItemStack(i) != ItemStack.AIR;
+							if (retry) break;
+						}
+						
+						retry = retry && inventory.getItemStack(4) == ItemStack.AIR;
+					}
+
 				}).build());
 	}
 	

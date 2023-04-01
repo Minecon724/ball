@@ -22,15 +22,19 @@ public class BallEntity extends Entity {
 	
 	final private double gravity = -9.807;
 	public Vec velocity = new Vec(ThreadLocalRandom.current().nextDouble(-10, 10),0,ThreadLocalRandom.current().nextDouble(-10, 10));
-
-	public BallEntity() {
+	
+	public BallEntity(Block block) {
 		super(EntityType.FALLING_BLOCK);
 		
 		final FallingBlockMeta meta = (FallingBlockMeta) this.getEntityMeta();
+		meta.setBlock(block);
 		
 		this.setNoGravity(true);
-		meta.setBlock(Block.WHITE_WOOL);
 		velocity = new Vec(0,0,0);
+	}
+	
+	public BallEntity() {
+		this(Block.WHITE_WOOL);
 	}
 	
 	public void update(long time) {
@@ -60,27 +64,20 @@ public class BallEntity extends Entity {
 		Point pointSouth = newPosition.add(0, 0.5, 0.5);
 		Point pointNorth = pointSouth.sub(0, 0, 1);
 		
-		if (!this.getInstance().isChunkLoaded(pointEast))
-			this.getInstance().loadChunk(pointEast);
-		if (!this.getInstance().isChunkLoaded(pointWest))
-			this.getInstance().loadChunk(pointWest);
-		if (!this.getInstance().isChunkLoaded(pointNorth))
-			this.getInstance().loadChunk(pointNorth);
-		if (!this.getInstance().isChunkLoaded(pointSouth))
-			this.getInstance().loadChunk(pointSouth);
-		
-		if (this.getInstance().getBlock(pointBottom).isSolid() || this.getInstance().getBlock(pointTop).isSolid()) {
-			newPosition = newPosition.withY(initialPosition.y());
-			this.velocity = this.velocity.mul(0.97, -0.8, 0.97);
-		}
-		if (this.getInstance().getBlock(pointEast).isSolid() || this.getInstance().getBlock(pointWest).isSolid()) {
-			newPosition = newPosition.withX(initialPosition.x());
-			this.velocity = this.velocity.mul(-0.8, 1, 1);
-		}
-		if (this.getInstance().getBlock(pointNorth).isSolid() || this.getInstance().getBlock(pointSouth).isSolid()) {
-			newPosition = newPosition.withZ(initialPosition.z());
-			this.velocity = this.velocity.mul(1, 1, -0.8);
-		}
+		try {
+			if (this.getInstance().getBlock(pointBottom).isSolid() || this.getInstance().getBlock(pointTop).isSolid()) {
+				newPosition = newPosition.withY(initialPosition.y());
+				this.velocity = this.velocity.mul(0.97, -0.8, 0.97);
+			}
+			if (this.getInstance().getBlock(pointEast).isSolid() || this.getInstance().getBlock(pointWest).isSolid()) {
+				newPosition = newPosition.withX(initialPosition.x());
+				this.velocity = this.velocity.mul(-0.8, 1, 1);
+			}
+			if (this.getInstance().getBlock(pointNorth).isSolid() || this.getInstance().getBlock(pointSouth).isSolid()) {
+				newPosition = newPosition.withZ(initialPosition.z());
+				this.velocity = this.velocity.mul(1, 1, -0.8);
+			}
+		} catch (NullPointerException e) { }
 		
 		//if (newPosition.y() < 40) {
 		//	newPosition = newPosition.withY(40);
@@ -92,7 +89,7 @@ public class BallEntity extends Entity {
 			Entity entity = player;
 			
 			if (this.getBoundingBox().intersectEntity(newPosition, entity)) {
-				Vec diff = newPosition.withY(0).asVec().sub(entity.getPosition().withY(0).asVec());
+				//Vec diff = newPosition.withY(0).asVec().sub(entity.getPosition().withY(0).asVec());
 				this.velocity = physicsPlayer.getMovement();
 			}
 			

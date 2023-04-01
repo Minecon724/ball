@@ -1,14 +1,26 @@
 package pl.minecon724.ball;
 
+import java.io.StringReader;
 import java.util.concurrent.ThreadLocalRandom;
+
+import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBT;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.GlobalEventHandler;
@@ -16,19 +28,26 @@ import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerPacketEvent;
 import net.minestom.server.event.player.PlayerStartDiggingEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.velocity.VelocityProxy;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
+import net.minestom.server.network.packet.server.play.OpenSignEditorPacket;
 import net.minestom.server.ping.ResponseData;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.SchedulerManager;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.Rotation;
 import net.minestom.server.world.DimensionType;
 import pl.minecon724.ball.commands.*;
 
@@ -51,7 +70,7 @@ public class MainClass {
 		MinecraftServer.setBrandName("Velocity");
 		MinecraftServer.getConnectionManager().setPlayerProvider(new PhysicsPlayerProvider());
 		MinecraftServer.setCompressionThreshold(0);
-		VelocityProxy.enable("rrXQ5MTvSles");
+		//VelocityProxy.enable("rrXQ5MTvSles");
 		
 		// Register commands
 		commandManager.register(new HelpCommand());
@@ -85,7 +104,14 @@ public class MainClass {
 			Player player = event.getPlayer();
 			
 			player.setAllowFlying(true);
+			player.getInventory().setItemStack(0, ItemStack.of(Material.WHITE_CONCRETE_POWDER));
+			player.getInventory().setItemStack(1, ItemStack.of(Material.WHITE_STAINED_GLASS));
+			player.getInventory().setItemStack(2, ItemStack.of(Material.STONE_SLAB));
+			player.getInventory().setItemStack(3, ItemStack.of(Material.OAK_SIGN));
 			player.getInventory().setItemStack(4, ItemStack.of(Material.STONE));
+			
+			player.getInventory().setItemStack(7, ItemStack.of(Material.WHITE_DYE));
+			player.getInventory().setItemStack(8, ItemStack.of(Material.BLACK_DYE));
 			
 			Pos spawnPoint = new Pos(
 					ThreadLocalRandom.current().nextInt(-75, 75),
@@ -105,7 +131,7 @@ public class MainClass {
 		
 		globalEventHandler.addListener(EventListener.builder(PlayerStartDiggingEvent.class)
 				.handler(event -> {
-					if (event.getBlock() != Block.STONE) return;
+					if (event.getBlock() == Block.GRASS_BLOCK) return;
 					
 					event.getInstance().setBlock(event.getBlockPosition(), Block.AIR);
 				}).build());
@@ -113,12 +139,68 @@ public class MainClass {
 		globalEventHandler.addListener(EventListener.builder(PlayerBlockPlaceEvent.class)
 				.handler(event -> {
 					event.consumeBlock(false);
+					
+					if (event.getBlock() == Block.OAK_SIGN) {
+						
+						if (event.getBlockFace() != BlockFace.TOP && event.getBlockFace() != BlockFace.BOTTOM) {
+							String facing = event.getBlockFace().toString().toLowerCase();
+							event.setBlock(Block.OAK_WALL_SIGN.withProperty("facing", facing));
+						} else {
+							float yaw = (int)event.getPlayer().getPosition().yaw();
+							yaw = 180 + yaw;
+							
+							Integer rotation = (int) (yaw * 16.0F / 360.0F + 0.5D) & 15;
+							System.out.println(rotation);
+							
+							event.setBlock(Block.OAK_SIGN.withProperty("rotation", rotation.toString()));
+						}
+							
+						event.getPlayer().sendPacket(
+								new OpenSignEditorPacket(event.getBlockPosition()));
+					}
+					
 				}).build());
 		
 		globalEventHandler.addListener(EventListener.builder(PlayerBlockBreakEvent.class)
 				.handler(event -> {
 					event.setCancelled(true);
 				}).build());
+		
+		globalEventHandler.addListener(PlayerPacketEvent.class, event -> {
+			if (event.getPacket() instanceof ClientUpdateSignPacket) {
+				ClientUpdateSignPacket packet = (ClientUpdateSignPacket) event.getPacket();
+				
+				Instance instance = event.getPlayer().getInstance();
+				Block sign = instance.getBlock(packet.blockPosition());
+				
+				if (sign.compare(Block.OAK_SIGN) || sign.compare(Block.OAK_WALL_SIGN)) {
+					System.out.println(packet.lines());
+					
+					MiniMessage mm = MiniMessage.builder().tags(TagResolver.builder()
+							.resolver(StandardTags.rainbow())
+							.build()).build();
+					
+					String[] lines = new String[4];
+					for (int i=0;i<4;i++) {
+						// about that...
+						lines[i] = GsonComponentSerializer.gson().serialize(
+								mm.deserialize("<rainbow>" + packet.lines().get(i).replace("<", "\\<").replace(">", "\\>") + "</rainbow>"));
+					}
+					
+					NBT nbt = NBT.Compound(root -> {
+						root.put("GlowingText", NBT.Byte(0));
+						root.put("Color", NBT.String("black"));
+						root.put("Text1", NBT.String(lines[0]));
+						root.put("Text2", NBT.String(lines[1]));
+						root.put("Text3", NBT.String(lines[2]));
+						root.put("Text4", NBT.String(lines[3]));
+					});
+					sign = sign.withNbt((NBTCompound)nbt);
+					System.out.println(sign.nbt());
+					instance.setBlock(packet.blockPosition(), sign);
+				}
+			}
+		});
 		
 		scheduler.scheduleTask(new Runnable() {
 			@Override
@@ -141,6 +223,7 @@ public class MainClass {
 			}
 		}, TaskSchedule.immediate(), TaskSchedule.seconds(10), ExecutionType.ASYNC);
 		
+		new Painter(globalEventHandler);
 		new Logger(logger, globalEventHandler);
 		
 		// Start the server
