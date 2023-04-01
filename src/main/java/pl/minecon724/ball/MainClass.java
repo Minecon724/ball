@@ -188,8 +188,6 @@ public class MainClass {
 					}
 					
 					NBT nbt = NBT.Compound(root -> {
-						root.put("GlowingText", NBT.Byte(0));
-						root.put("Color", NBT.String("black"));
 						root.put("Text1", NBT.String(lines[0]));
 						root.put("Text2", NBT.String(lines[1]));
 						root.put("Text3", NBT.String(lines[2]));
