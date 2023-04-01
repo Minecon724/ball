@@ -70,7 +70,7 @@ public class MainClass {
 		MinecraftServer.setBrandName("Velocity");
 		MinecraftServer.getConnectionManager().setPlayerProvider(new PhysicsPlayerProvider());
 		MinecraftServer.setCompressionThreshold(0);
-		//VelocityProxy.enable("rrXQ5MTvSles");
+		VelocityProxy.enable("rrXQ5MTvSles");
 		
 		// Register commands
 		commandManager.register(new HelpCommand());
